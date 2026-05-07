@@ -68,10 +68,25 @@ export default function AdminClaimDashboard() {
     setLoading(false);
   }, [startDate, endDate]);
 
-  const updateClaimStatus = async (transactionId, claimStatus) => {
+  const updateClaimStatus = async (
+    transactionId,
+    claimStatus,
+    rejectReason = "",
+  ) => {
+    if (claimStatus === "reject" && rejectReason.trim() === "") {
+      toast.error("Alasan reject wajib diisi");
+      return;
+    }
+
+    const payload = {
+      claim_status: claimStatus,
+      claim_reject_reason:
+        claimStatus === "reject" ? rejectReason.trim() : null,
+    };
+
     const { error } = await supabase
       .from("transactions")
-      .update({ claim_status: claimStatus })
+      .update(payload)
       .eq("id", transactionId);
 
     if (error) {
@@ -83,7 +98,12 @@ export default function AdminClaimDashboard() {
     setOrders((prev) =>
       prev.map((order) =>
         order.id === transactionId
-          ? { ...order, claim_status: claimStatus }
+          ? {
+              ...order,
+              claim_status: claimStatus,
+              claim_reject_reason:
+                claimStatus === "reject" ? rejectReason.trim() : null,
+            }
           : order,
       ),
     );
@@ -140,7 +160,7 @@ export default function AdminClaimDashboard() {
   );
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="space-y-5 pb-20 lg:pb-0">
       <div className="mx-auto max-w-7xl space-y-5">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">

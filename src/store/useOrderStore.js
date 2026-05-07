@@ -30,7 +30,10 @@ export const useOrderStore = create(
           }
 
           return {
-            orderItems: [...state.orderItems, { product, qty: 1, discount: 0 }],
+            orderItems: [
+              ...state.orderItems,
+              { product, qty: 1, discount: 0, bonus_qty: 0 },
+            ],
           };
         }),
 
@@ -43,23 +46,20 @@ export const useOrderStore = create(
           ),
         })),
 
-      qtyDecrease: (productKey) =>
-        set((state) => ({
-          orderItems: state.orderItems
-            .map((item) => {
-              if (getProductKey(item.product) !== productKey) return item;
-
-              const nextQty = Number(item.qty || 0) - 1;
-              return { ...item, qty: nextQty };
-            })
-            .filter((item) => Number(item.qty || 0) > 0),
-        })),
-
       discountUpdate: (productKey, discount) =>
         set((state) => ({
           orderItems: state.orderItems.map((item) =>
             getProductKey(item.product) === productKey
               ? { ...item, discount }
+              : item,
+          ),
+        })),
+
+      bonusQtyUpdate: (productKey, bonusQty) =>
+        set((state) => ({
+          orderItems: state.orderItems.map((item) =>
+            getProductKey(item.product) === productKey
+              ? { ...item, bonus_qty: bonusQty }
               : item,
           ),
         })),

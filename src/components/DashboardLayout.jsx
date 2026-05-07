@@ -27,6 +27,8 @@ export default function DashboardLayout({ children }) {
   }, []);
 
   const role = userProfile?.role?.trim();
+  const name = userProfile?.full_name || "User";
+  const initial = name.charAt(0).toUpperCase();
 
   const dashboardPath =
     role === "supervisor"
@@ -40,73 +42,166 @@ export default function DashboardLayout({ children }) {
   const canOpenOrder = role === "salesman";
   const canOpenStock = role === "admin_sales" || role === "supervisor";
 
-  const initial = userProfile?.full_name?.charAt(0)?.toUpperCase() || "U";
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/login", { replace: true });
   };
 
   const navClass = ({ isActive }) =>
-    `rounded-xl px-4 py-3 text-sm font-medium ${
-      isActive ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-100"
+    `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
+      isActive
+        ? "bg-emerald-800 text-white"
+        : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
     }`;
 
   return (
-    <div className="min-h-screen bg-gray-50 lg:flex">
-      <aside className="border-b border-gray-200 bg-white lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:border-b-0 lg:border-r">
-        <div className="flex h-full flex-col">
-          <div className="border-b border-gray-100 px-5 py-5">
-            <Link to={dashboardPath}>
-              <h1 className="text-lg font-bold text-gray-900">SALES ORDER</h1>
-              <p className="text-xs text-gray-500">PBF Dashboard</p>
+    <div className="min-h-screen bg-[#eef1ef] p-0 text-slate-950 lg:p-3">
+      <div className="min-h-screen overflow-hidden bg-[#f7f8f6] lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:rounded-3xl lg:border lg:border-slate-200 lg:shadow-sm">
+        <aside className="hidden border-r border-slate-200 bg-white/90 p-4 lg:flex lg:flex-col">
+          <div className="mb-5 flex items-center justify-between">
+            <Link
+              to={dashboardPath}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-800 text-sm font-black text-white"
+            >
+              S
             </Link>
+
+            <div className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold text-slate-500">
+              PBF
+            </div>
           </div>
 
-          <nav className="flex gap-2 overflow-x-auto p-3 lg:flex-1 lg:flex-col lg:overflow-visible">
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Search"
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700"
+            />
+          </div>
+
+          <nav className="space-y-1">
             <NavLink to={dashboardPath} className={navClass}>
+              <span className="text-base">▣</span>
               Dashboard
             </NavLink>
 
             {canOpenOrder && (
               <NavLink to="/salesman/order" className={navClass}>
+                <span className="text-base">□</span>
                 Order
               </NavLink>
             )}
 
             {canOpenStock && (
               <NavLink to="/stock-upload" className={navClass}>
+                <span className="text-base">⇧</span>
                 Upload Stock
               </NavLink>
             )}
           </nav>
 
-          <div className="border-t border-gray-100 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+          <div className="mt-6">
+            <p className="mb-2 px-3 text-xs font-bold text-slate-400">
+              Activity
+            </p>
+
+            <div className="space-y-1">
+              <NavLink to={dashboardPath} className={navClass}>
+                <span className="text-base">◎</span>
+                Reports
+              </NavLink>
+
+              <NavLink to={dashboardPath} className={navClass}>
+                <span className="text-base">↺</span>
+                History
+              </NavLink>
+            </div>
+          </div>
+
+          <div className="mt-auto border-t border-slate-200 pt-4">
+            <div className="mb-3 flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-800 text-sm font-bold text-white">
                 {initial}
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-gray-900">
-                  {userProfile?.full_name || "User"}
+                <p className="truncate text-sm font-bold text-slate-950">
+                  {name}
                 </p>
-                <p className="truncate text-xs text-gray-500">{role || "-"}</p>
+                <p className="truncate text-xs text-slate-500">{role || "-"}</p>
               </div>
+            </div>
 
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="rounded-lg px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-50"
-              >
-                Logout
-              </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-red-500 hover:bg-red-50"
+            >
+              Logout
+            </button>
+          </div>
+        </aside>
+
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 lg:hidden">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-800 text-sm font-bold text-white">
+              {initial}
+            </div>
+            <div>
+              <p className="text-base font-black text-emerald-900">
+                Sales Order
+              </p>
+              <p className="text-xs text-slate-500">{role || "-"}</p>
             </div>
           </div>
-        </div>
-      </aside>
 
-      <main className="min-h-screen flex-1 lg:ml-64">{children}</main>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="text-sm font-semibold text-red-500"
+          >
+            Logout
+          </button>
+        </header>
+
+        <main className="min-h-screen overflow-x-hidden">
+          <div className="mx-auto w-full max-w-[1320px] px-4 py-5 sm:px-6 lg:px-6 lg:py-6">
+            {children}
+          </div>
+        </main>
+
+        <nav className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-3 border-t border-slate-200 bg-white lg:hidden">
+          <NavLink
+            to={dashboardPath}
+            className="py-3 text-center text-xs font-bold text-emerald-800"
+          >
+            Dashboard
+          </NavLink>
+
+          {canOpenOrder ? (
+            <NavLink
+              to="/salesman/order"
+              className="py-3 text-center text-xs font-bold text-slate-600"
+            >
+              Order
+            </NavLink>
+          ) : (
+            <NavLink
+              to={dashboardPath}
+              className="py-3 text-center text-xs font-bold text-slate-600"
+            >
+              Orders
+            </NavLink>
+          )}
+
+          <NavLink
+            to={canOpenStock ? "/stock-upload" : dashboardPath}
+            className="py-3 text-center text-xs font-bold text-slate-600"
+          >
+            {canOpenStock ? "Stock" : "Reports"}
+          </NavLink>
+        </nav>
+      </div>
     </div>
   );
 }

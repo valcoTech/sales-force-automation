@@ -28,6 +28,7 @@ export default function NewOrder() {
     removeItem,
     qtyUpdate,
     discountUpdate,
+    bonusQtyUpdate,
     resetOrder,
     updateOrCreate,
     orderItems,
@@ -137,11 +138,13 @@ export default function NewOrder() {
       const price = Number(item.product.price || 0);
       const qty = Number(item.qty || 0);
       const discount = Number(item.discount || 0);
+      const bonusQty = Number(item.bonus_qty || 0);
 
       return {
         transaction_id: transaction.id,
         product_id: item.product.product_id,
         qty,
+        bonus_qty: bonusQty,
         price_at_time: price,
         discount,
         subtotal: price * qty,
@@ -297,6 +300,7 @@ export default function NewOrder() {
                   const qtyValue = item.qty;
                   const qtyNumber = Number(qtyValue || 0);
                   const discount = Number(item.discount || 0);
+                  const bonusQty = Number(item.bonus_qty || 0);
                   const subtotal = price * qtyNumber;
                   const qtyInvalid =
                     qtyValue === "" ||
@@ -384,22 +388,47 @@ export default function NewOrder() {
                           )}
                         </div>
 
-                        <div>
-                          <label className="mb-1 block text-xs text-gray-500">
-                            Discount (%)
-                          </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="mb-1 block text-xs text-gray-500">
+                              Discount (%)
+                            </label>
 
-                          <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={discount}
-                            onChange={(e) =>
-                              discountUpdate(product.product_id, e.target.value)
-                            }
-                            className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="0"
-                          />
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={discount}
+                              onChange={(e) =>
+                                discountUpdate(
+                                  product.product_id,
+                                  e.target.value,
+                                )
+                              }
+                              className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="0"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="mb-1 block text-xs text-gray-500">
+                              Bonus Qty
+                            </label>
+
+                            <input
+                              type="number"
+                              min="0"
+                              value={bonusQty}
+                              onChange={(e) =>
+                                bonusQtyUpdate(
+                                  product.product_id,
+                                  e.target.value,
+                                )
+                              }
+                              className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="0"
+                            />
+                          </div>
                         </div>
 
                         <div className="flex justify-between border-t border-gray-100 pt-2">

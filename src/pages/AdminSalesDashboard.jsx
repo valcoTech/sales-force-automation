@@ -138,6 +138,7 @@ export default function AdminSalesDashboard() {
   const pending = orders.filter((order) => order.status === "pending").length;
   const proses = orders.filter((order) => order.status === "proses").length;
   const done = orders.filter((order) => order.status === "done").length;
+
   const salesmanCount = salesmen.length;
 
   return (
@@ -213,6 +214,7 @@ export default function AdminSalesDashboard() {
                 <option value="pending">Pending</option>
                 <option value="proses">Proses</option>
                 <option value="done">Done</option>
+                <option value="reject">Reject</option>
               </select>
             </div>
 

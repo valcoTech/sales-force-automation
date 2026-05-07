@@ -392,6 +392,240 @@
 //     </div>
 //   );
 // }
+
+//** new code */
+
+// import { Fragment, useState } from "react";
+// import StatusBadge from "./StatusBadge";
+
+// export default function OrderTable({
+//   orders = [],
+//   showSalesman = false,
+//   showItems = false,
+//   showClaimStatus = false,
+//   onStatusChange,
+//   onClaimStatusChange,
+// }) {
+//   const [openOrderId, setOpenOrderId] = useState(null);
+
+//   const colSpan =
+//     5 +
+//     (showSalesman ? 1 : 0) +
+//     (showClaimStatus ? 1 : 0) +
+//     (onStatusChange ? 1 : 0) +
+//     (onClaimStatusChange ? 1 : 0);
+
+//   const toggleOrder = (orderId) => {
+//     setOpenOrderId((prev) => (prev === orderId ? null : orderId));
+//   };
+
+//   return (
+//     <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white">
+//       <table className="w-full min-w-[1000px] text-left text-sm">
+//         <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500">
+//           <tr>
+//             <th className="px-4 py-3">Invoice</th>
+//             <th className="px-4 py-3">Tanggal</th>
+//             <th className="px-4 py-3">Customer</th>
+//             {showSalesman && <th className="px-4 py-3">Salesman</th>}
+//             <th className="px-4 py-3">Total</th>
+//             <th className="px-4 py-3">Status Order</th>
+//             {showClaimStatus && <th className="px-4 py-3">Status Claim</th>}
+//             {onStatusChange && <th className="px-4 py-3">Update Order</th>}
+//             {onClaimStatusChange && <th className="px-4 py-3">Update Claim</th>}
+//           </tr>
+//         </thead>
+
+//         <tbody className="divide-y divide-gray-100">
+//           {orders.length === 0 ? (
+//             <tr>
+//               <td
+//                 colSpan={colSpan}
+//                 className="px-4 py-8 text-center text-gray-400"
+//               >
+//                 Belum ada order
+//               </td>
+//             </tr>
+//           ) : (
+//             orders.map((order) => {
+//               const isOpen = openOrderId === order.id;
+//               const items = order.transaction_items || [];
+//               const salesmanName =
+//                 order.salesman?.full_name ||
+//                 order.users?.full_name ||
+//                 order.salesman_id ||
+//                 "-";
+
+//               return (
+//                 <Fragment key={order.id}>
+//                   <tr className="hover:bg-gray-50">
+//                     <td className="px-4 py-3 font-medium">
+//                       {showItems ? (
+//                         <button
+//                           type="button"
+//                           onClick={() => toggleOrder(order.id)}
+//                           className="inline-flex items-center gap-2 font-semibold text-blue-600 hover:underline"
+//                         >
+//                           <span className="text-sm font-bold">
+//                             {isOpen ? "v" : ">"}
+//                           </span>
+//                           <span>
+//                             {order.invoice_number || `INV-${order.id}`}
+//                           </span>
+//                         </button>
+//                       ) : (
+//                         <span className="font-semibold text-blue-600">
+//                           {order.invoice_number || `INV-${order.id}`}
+//                         </span>
+//                       )}
+//                     </td>
+
+//                     <td className="px-4 py-3">{order.date || "-"}</td>
+
+//                     <td className="px-4 py-3 font-medium text-gray-800">
+//                       {order.customers?.customer_name || "-"}
+//                     </td>
+
+//                     {showSalesman && (
+//                       <td className="px-4 py-3">{salesmanName}</td>
+//                     )}
+
+//                     <td className="px-4 py-3">
+//                       Rp{" "}
+//                       {Number(order.total_amount || 0).toLocaleString("id-ID")}
+//                     </td>
+
+//                     <td className="px-4 py-3">
+//                       <StatusBadge status={order.status} />
+//                     </td>
+
+//                     {showClaimStatus && (
+//                       <td className="px-4 py-3">
+//                         <StatusBadge status={order.claim_status || "pending"} />
+//                       </td>
+//                     )}
+
+//                     {onStatusChange && (
+//                       <td className="px-4 py-3">
+//                         <select
+//                           value={order.status || "pending"}
+//                           onChange={(e) =>
+//                             onStatusChange(order.id, e.target.value)
+//                           }
+//                           className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                         >
+//                           <option value="pending">Pending</option>
+//                           <option value="proses">Proses</option>
+//                           <option value="done">Done</option>
+//                         </select>
+//                       </td>
+//                     )}
+
+//                     {onClaimStatusChange && (
+//                       <td className="px-4 py-3">
+//                         <select
+//                           value={order.claim_status || "pending"}
+//                           onChange={(e) =>
+//                             onClaimStatusChange(order.id, e.target.value)
+//                           }
+//                           className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                         >
+//                           <option value="pending">Pending</option>
+//                           <option value="proses">Proses</option>
+//                           <option value="done">Done</option>
+//                         </select>
+//                       </td>
+//                     )}
+//                   </tr>
+
+//                   {showItems && isOpen && (
+//                     <tr>
+//                       <td colSpan={colSpan} className="bg-gray-50 px-4 py-4">
+//                         <div className="rounded-xl border border-gray-200 bg-white">
+//                           <div className="border-b border-gray-100 px-4 py-3">
+//                             <p className="text-sm font-semibold text-gray-800">
+//                               Order Details
+//                             </p>
+//                           </div>
+
+//                           <div className="overflow-x-auto">
+//                             <table className="w-full min-w-[760px] text-sm">
+//                               <thead className="border-b border-gray-100 text-xs uppercase text-gray-500">
+//                                 <tr>
+//                                   <th className="px-4 py-3 text-left">
+//                                     Product Details
+//                                   </th>
+//                                   <th className="px-4 py-3 text-left">Qty</th>
+//                                   <th className="px-4 py-3 text-left">Harga</th>
+//                                   <th className="px-4 py-3 text-left">Disc</th>
+//                                   <th className="px-4 py-3 text-right">
+//                                     Subtotal
+//                                   </th>
+//                                 </tr>
+//                               </thead>
+
+//                               <tbody className="divide-y divide-gray-100">
+//                                 {items.length === 0 ? (
+//                                   <tr>
+//                                     <td
+//                                       colSpan={5}
+//                                       className="px-4 py-6 text-center text-gray-400"
+//                                     >
+//                                       Item order tidak ditemukan
+//                                     </td>
+//                                   </tr>
+//                                 ) : (
+//                                   items.map((item) => (
+//                                     <tr key={item.id}>
+//                                       <td className="px-4 py-3">
+//                                         <p className="font-semibold text-gray-800">
+//                                           {item.products?.product_name || "-"}
+//                                         </p>
+//                                         <p className="text-xs text-gray-400">
+//                                           {item.product_id}
+//                                         </p>
+//                                       </td>
+//                                       <td className="px-4 py-3">
+//                                         {item.qty || 0}
+//                                       </td>
+//                                       <td className="px-4 py-3">
+//                                         Rp{" "}
+//                                         {Number(
+//                                           item.price_at_time || 0,
+//                                         ).toLocaleString("id-ID")}
+//                                       </td>
+//                                       <td className="px-4 py-3 text-red-500">
+//                                         {Number(
+//                                           item.discount || 0,
+//                                         ).toLocaleString("id-ID")}
+//                                         %
+//                                       </td>
+//                                       <td className="px-4 py-3 text-right font-semibold">
+//                                         Rp{" "}
+//                                         {Number(
+//                                           item.subtotal || 0,
+//                                         ).toLocaleString("id-ID")}
+//                                       </td>
+//                                     </tr>
+//                                   ))
+//                                 )}
+//                               </tbody>
+//                             </table>
+//                           </div>
+//                         </div>
+//                       </td>
+//                     </tr>
+//                   )}
+//                 </Fragment>
+//               );
+//             })
+//           )}
+//         </tbody>
+//       </table>
+//     </div>
+//   );
+// }
+
 import { Fragment, useState } from "react";
 import StatusBadge from "./StatusBadge";
 
@@ -404,21 +638,54 @@ export default function OrderTable({
   onClaimStatusChange,
 }) {
   const [openOrderId, setOpenOrderId] = useState(null);
+  const [rejectDraft, setRejectDraft] = useState({});
+
+  const canUpdateClaim = Boolean(onClaimStatusChange);
 
   const colSpan =
     5 +
     (showSalesman ? 1 : 0) +
     (showClaimStatus ? 1 : 0) +
     (onStatusChange ? 1 : 0) +
-    (onClaimStatusChange ? 1 : 0);
+    (canUpdateClaim ? 1 : 0);
 
   const toggleOrder = (orderId) => {
     setOpenOrderId((prev) => (prev === orderId ? null : orderId));
   };
 
+  const handleClaimChange = (order, value) => {
+    if (!canUpdateClaim) return;
+
+    if (value === "reject") {
+      setOpenOrderId(order.id);
+      setRejectDraft((prev) => ({
+        ...prev,
+        [order.id]: order.claim_reject_reason || "",
+      }));
+      return;
+    }
+
+    onClaimStatusChange(order.id, value, "");
+  };
+
+  const submitReject = (orderId) => {
+    const reason = rejectDraft[orderId] || "";
+    if (!canUpdateClaim) return;
+
+    onClaimStatusChange(orderId, "reject", reason);
+  };
+
+  const cancelReject = (orderId) => {
+    setRejectDraft((prev) => {
+      const next = { ...prev };
+      delete next[orderId];
+      return next;
+    });
+  };
+
   return (
     <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white">
-      <table className="w-full min-w-[1000px] text-left text-sm">
+      <table className="w-full min-w-[1080px] text-left text-sm">
         <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500">
           <tr>
             <th className="px-4 py-3">Invoice</th>
@@ -429,7 +696,7 @@ export default function OrderTable({
             <th className="px-4 py-3">Status Order</th>
             {showClaimStatus && <th className="px-4 py-3">Status Claim</th>}
             {onStatusChange && <th className="px-4 py-3">Update Order</th>}
-            {onClaimStatusChange && <th className="px-4 py-3">Update Claim</th>}
+            {canUpdateClaim && <th className="px-4 py-3">Update Claim</th>}
           </tr>
         </thead>
 
@@ -452,6 +719,9 @@ export default function OrderTable({
                 order.users?.full_name ||
                 order.salesman_id ||
                 "-";
+
+              const rejectReason = order.claim_reject_reason;
+              const isRejectDraftOpen = rejectDraft[order.id] !== undefined;
 
               return (
                 <Fragment key={order.id}>
@@ -514,22 +784,24 @@ export default function OrderTable({
                           <option value="pending">Pending</option>
                           <option value="proses">Proses</option>
                           <option value="done">Done</option>
+                          <option value="reject">Reject</option>
                         </select>
                       </td>
                     )}
 
-                    {onClaimStatusChange && (
+                    {canUpdateClaim && (
                       <td className="px-4 py-3">
                         <select
                           value={order.claim_status || "pending"}
                           onChange={(e) =>
-                            onClaimStatusChange(order.id, e.target.value)
+                            handleClaimChange(order, e.target.value)
                           }
                           className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                           <option value="pending">Pending</option>
                           <option value="proses">Proses</option>
                           <option value="done">Done</option>
+                          <option value="reject">Reject</option>
                         </select>
                       </td>
                     )}
@@ -538,6 +810,54 @@ export default function OrderTable({
                   {showItems && isOpen && (
                     <tr>
                       <td colSpan={colSpan} className="bg-gray-50 px-4 py-4">
+                        {isRejectDraftOpen && canUpdateClaim && (
+                          <div className="mb-3 rounded-xl border border-red-200 bg-red-50 p-4">
+                            <label className="mb-2 block text-sm font-semibold text-red-700">
+                              Alasan reject
+                            </label>
+
+                            <textarea
+                              value={rejectDraft[order.id] || ""}
+                              onChange={(e) =>
+                                setRejectDraft((prev) => ({
+                                  ...prev,
+                                  [order.id]: e.target.value,
+                                }))
+                              }
+                              rows={3}
+                              className="w-full rounded-xl border border-red-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                              placeholder="Tulis alasan reject di sini..."
+                            />
+
+                            <div className="mt-3 flex justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => cancelReject(order.id)}
+                                className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-white"
+                              >
+                                Batal
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => submitReject(order.id)}
+                                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                              >
+                                Simpan Reject
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {order.claim_status === "reject" && rejectReason && (
+                          <div className="mb-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            <span className="font-semibold">
+                              Alasan reject:{" "}
+                            </span>
+                            {rejectReason}
+                          </div>
+                        )}
+
                         <div className="rounded-xl border border-gray-200 bg-white">
                           <div className="border-b border-gray-100 px-4 py-3">
                             <p className="text-sm font-semibold text-gray-800">
@@ -546,13 +866,14 @@ export default function OrderTable({
                           </div>
 
                           <div className="overflow-x-auto">
-                            <table className="w-full min-w-[760px] text-sm">
+                            <table className="w-full min-w-[860px] text-sm">
                               <thead className="border-b border-gray-100 text-xs uppercase text-gray-500">
                                 <tr>
                                   <th className="px-4 py-3 text-left">
                                     Product Details
                                   </th>
                                   <th className="px-4 py-3 text-left">Qty</th>
+                                  <th className="px-4 py-3 text-left">Bonus</th>
                                   <th className="px-4 py-3 text-left">Harga</th>
                                   <th className="px-4 py-3 text-left">Disc</th>
                                   <th className="px-4 py-3 text-right">
@@ -565,7 +886,7 @@ export default function OrderTable({
                                 {items.length === 0 ? (
                                   <tr>
                                     <td
-                                      colSpan={5}
+                                      colSpan={6}
                                       className="px-4 py-6 text-center text-gray-400"
                                     >
                                       Item order tidak ditemukan
@@ -582,21 +903,29 @@ export default function OrderTable({
                                           {item.product_id}
                                         </p>
                                       </td>
+
                                       <td className="px-4 py-3">
                                         {item.qty || 0}
                                       </td>
+
+                                      <td className="px-4 py-3">
+                                        {item.bonus_qty || 0}
+                                      </td>
+
                                       <td className="px-4 py-3">
                                         Rp{" "}
                                         {Number(
                                           item.price_at_time || 0,
                                         ).toLocaleString("id-ID")}
                                       </td>
+
                                       <td className="px-4 py-3 text-red-500">
                                         {Number(
                                           item.discount || 0,
                                         ).toLocaleString("id-ID")}
                                         %
                                       </td>
+
                                       <td className="px-4 py-3 text-right font-semibold">
                                         Rp{" "}
                                         {Number(
