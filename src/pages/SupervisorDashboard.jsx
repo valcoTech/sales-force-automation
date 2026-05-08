@@ -8,6 +8,7 @@ export default function SupervisorDashboard() {
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -19,6 +20,9 @@ export default function SupervisorDashboard() {
 
     if (startDate) query = query.gte("date", startDate);
     if (endDate) query = query.lte("date", endDate);
+    if (statusFilter) {
+      query = query.eq("status", statusFilter);
+    }
 
     const { data, error } = await query;
 
@@ -57,7 +61,7 @@ export default function SupervisorDashboard() {
     setSalesmen(salesmanRows);
     setOrders(ordersWithSalesman);
     setLoading(false);
-  }, [startDate, endDate]);
+  }, [startDate, endDate, statusFilter]);
 
   useEffect(() => {
     loadOrders();
@@ -137,8 +141,10 @@ export default function SupervisorDashboard() {
         <DateFilter
           startDate={startDate}
           endDate={endDate}
+          statusFilter={statusFilter}
           setStartDate={setStartDate}
           setEndDate={setEndDate}
+          setStatusFilter={setStatusFilter}
           onRefresh={loadOrders}
         />
 
@@ -168,13 +174,15 @@ function SummaryCard({ title, value, color = "text-gray-900", small = false }) {
 function DateFilter({
   startDate,
   endDate,
+  statusFilter,
   setStartDate,
   setEndDate,
+  setStatusFilter,
   onRefresh,
 }) {
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-4">
-      <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
+      <div className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto_auto] sm:items-end">
         <div>
           <label className="mb-1 block text-xs font-medium text-gray-500">
             Dari tanggal
@@ -199,11 +207,29 @@ function DateFilter({
           />
         </div>
 
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">
+            Status Order
+          </label>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Semua status</option>
+            <option value="pending">Pending</option>
+            <option value="proses">Proses</option>
+            <option value="done">Done</option>
+            <option value="reject">Reject</option>
+          </select>
+        </div>
+
         <button
           type="button"
           onClick={() => {
             setStartDate("");
             setEndDate("");
+            setStatusFilter("");
           }}
           className="rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50"
         >
