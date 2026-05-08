@@ -40,6 +40,16 @@ const parseCsvLine = (line) => {
 const findHeaderKey = (headers, keys) =>
   headers.find((header) => keys.includes(header));
 
+const chunkArray = (array, size) => {
+  const chunks = [];
+
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+
+  return chunks;
+};
+
 export default function StockUpload() {
   const [rows, setRows] = useState([]);
   const [errors, setErrors] = useState([]);
@@ -140,7 +150,9 @@ export default function StockUpload() {
         ...row,
         isDuplicate: true,
         isValid: false,
-        errors: Array.from(new Set([...row.errors, "Product ID duplikat di CSV"])),
+        errors: Array.from(
+          new Set([...row.errors, "Product ID duplikat di CSV"]),
+        ),
       };
     });
 
@@ -196,21 +208,26 @@ export default function StockUpload() {
     setUpdatedProducts([]);
 
     const productIds = validRows.map((row) => row.product_id);
+    const existingProducts = [];
 
-    const { data: existingProducts, error: productError } = await supabase
-      .from("products")
-      .select("product_id")
-      .in("product_id", productIds);
+    for (const productIdChunk of chunkArray(productIds, 25)) {
+      const { data, error } = await supabase
+        .from("products")
+        .select("product_id")
+        .in("product_id", productIdChunk);
 
-    if (productError) {
-      console.error(productError);
-      toast.error("Gagal validasi product di database");
-      setUploading(false);
-      return;
+      if (error) {
+        console.error(error);
+        toast.error("Gagal validasi product di database");
+        setUploading(false);
+        return;
+      }
+
+      existingProducts.push(...(data || []));
     }
 
     const existingProductIds = new Set(
-      (existingProducts || []).map((product) => product.product_id),
+      existingProducts.map((product) => product.product_id),
     );
 
     const foundRows = validRows.filter((row) =>
@@ -232,17 +249,22 @@ export default function StockUpload() {
     const failedRows = [];
     const successRows = [];
 
-    for (const row of foundRows) {
-      const { error } = await supabase
-        .from("products")
-        .update({ stock: row.stock })
-        .eq("product_id", row.product_id);
+    for (const rowChunk of chunkArray(foundRows, 100)) {
+      const updatePayload = rowChunk.map((row) => ({
+        product_id: row.product_id,
+        stock: row.stock,
+      }));
+
+      const { error } = await supabase.from("products").upsert(updatePayload, {
+        onConflict: "product_id",
+        ignoreDuplicates: false,
+      });
 
       if (error) {
         console.error(error);
-        failedRows.push(row);
+        failedRows.push(...rowChunk);
       } else {
-        successRows.push(row);
+        successRows.push(...rowChunk);
       }
     }
 
@@ -302,15 +324,15 @@ product_id,stock
             <SummaryBox title="Total Baris" value={rows.length} />
             <SummaryBox title="Siap Upload" value={validRows.length} />
             <SummaryBox title="Invalid" value={invalidRows.length} danger />
-            <SummaryBox title="Tidak Ketemu" value={missingProducts.length} danger />
+            <SummaryBox
+              title="Tidak Ketemu"
+              value={missingProducts.length}
+              danger
+            />
           </div>
 
           {errors.length > 0 && (
-            <AlertBox
-              title="Format CSV salah"
-              items={errors}
-              tone="danger"
-            />
+            <AlertBox title="Format CSV salah" items={errors} tone="danger" />
           )}
 
           {invalidRows.length > 0 && (
