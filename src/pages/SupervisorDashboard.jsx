@@ -107,6 +107,7 @@ export default function SupervisorDashboard() {
   const pending = orders.filter((order) => order.status === "pending").length;
   const proses = orders.filter((order) => order.status === "proses").length;
   const done = orders.filter((order) => order.status === "done").length;
+  const reject = orders.filter((order) => order.claim_status === "reject").length;
   const salesmanCount = salesmen.length;
 
   return (
@@ -121,7 +122,7 @@ export default function SupervisorDashboard() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-7">
           <SummaryCard title="Total Order" value={totalOrder} />
           <SummaryCard
             title="Total Amount"
@@ -136,6 +137,7 @@ export default function SupervisorDashboard() {
           />
           <SummaryCard title="Proses" value={proses} color="text-blue-600" />
           <SummaryCard title="Done" value={done} color="text-green-600" />
+          <SummaryCard title="Reject" value={reject} color="text-red-600" />
         </div>
 
         <DateFilter
