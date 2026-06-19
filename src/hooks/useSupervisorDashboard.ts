@@ -2,6 +2,7 @@ import { useEffect, useCallback, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { Transaction, UserProfile } from "@/types/database";
 import { filterOrdersForAdmin } from "@/lib/promelFilter";
+import { fetchAllTransactions } from "@/lib/fetchAllTransactions";
 
 export function useSupervisorDashboard() {
   const [orders, setOrders] = useState<Transaction[]>([]);
@@ -14,17 +15,11 @@ export function useSupervisorDashboard() {
   const loadOrders = useCallback(async () => {
     setLoading(true);
 
-    let query = supabase
-      .from("transactions")
-      .select("*, customers(*), transaction_items(*, products(*))")
-      .order("created_at", { ascending: false })
-      .limit(200);
-
-    if (startDate) query = query.gte("date", startDate);
-    if (endDate) query = query.lte("date", endDate);
-    if (statusFilter) query = query.eq("status", statusFilter);
-
-    const { data, error } = await query;
+    const { data, error } = await fetchAllTransactions({
+      startDate,
+      endDate,
+      statusFilter,
+    });
 
     if (error) {
       console.error("Gagal load supervisor transactions:", error);
@@ -33,7 +28,7 @@ export function useSupervisorDashboard() {
       return;
     }
 
-    const transactionData = (data as Transaction[]) || [];
+    const transactionData = data;
 
     const salesmanIds = [
       ...new Set(transactionData.map((order) => order.salesman_id)),

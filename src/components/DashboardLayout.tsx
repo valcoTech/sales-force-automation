@@ -68,6 +68,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const canOpenOrder = role === "salesman";
   const canOpenStock = role === "admin_sales" || role === "supervisor";
+  const canOpenReport = role === "supervisor";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -92,10 +93,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Brand */}
         <div className="flex h-16 items-center gap-3 border-b border-slate-100 px-5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-sm shadow-blue-600/20">
-            <span className="text-xs font-black text-white tracking-tighter">SO</span>
+            <span className="text-xs font-black text-white tracking-tighter">
+              SO
+            </span>
           </div>
           <div>
-            <p className="text-sm font-bold text-slate-900 leading-tight">Sales Order</p>
+            <p className="text-sm font-bold text-slate-900 leading-tight">
+              Sales Order
+            </p>
             <p className="text-[11px] text-slate-400">PBF Management</p>
           </div>
         </div>
@@ -105,12 +110,35 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
             Menu Utama
           </p>
-          <SideNavLink href={dashboardPath} icon="📊" label="Dashboard" active={pathname === dashboardPath} />
+          <SideNavLink
+            href={dashboardPath}
+            icon="📊"
+            label="Dashboard"
+            active={pathname === dashboardPath}
+          />
           {canOpenOrder && (
-            <SideNavLink href="/salesman/order" icon="📝" label="Buat Order" active={pathname === "/salesman/order"} />
+            <SideNavLink
+              href="/salesman/order"
+              icon="📝"
+              label="Buat Order"
+              active={pathname === "/salesman/order"}
+            />
           )}
           {canOpenStock && (
-            <SideNavLink href="/stock-upload" icon="📦" label="Upload Stock" active={pathname === "/stock-upload"} />
+            <SideNavLink
+              href="/stock-upload"
+              icon="📦"
+              label="Upload Stock"
+              active={pathname === "/stock-upload"}
+            />
+          )}
+          {canOpenReport && (
+            <SideNavLink
+              href="/supervisor/report"
+              icon="📈"
+              label="Report"
+              active={pathname === "/supervisor/report"}
+            />
           )}
 
           <div className="my-4 border-t border-slate-100" />
@@ -118,8 +146,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
             Aktivitas
           </p>
-          <SideNavLink href={`${dashboardPath}?tab=reports`} icon="📈" label="Reports" active={false} />
-          <SideNavLink href={`${dashboardPath}?tab=history`} icon="🕐" label="Riwayat" active={false} />
+
+          <SideNavLink
+            href={`${dashboardPath}?tab=history`}
+            icon="🕐"
+            label="Riwayat"
+            active={false}
+          />
         </nav>
 
         {/* User card */}
@@ -129,7 +162,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {initial}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-slate-900">{name}</p>
+              <p className="truncate text-sm font-semibold text-slate-900">
+                {name}
+              </p>
               <p className="truncate text-xs text-slate-500">{roleBadge}</p>
             </div>
           </div>
@@ -139,8 +174,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             onClick={handleLogout}
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-red-500 transition-colors hover:border-red-200 hover:bg-red-50 cursor-pointer"
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
             </svg>
             Logout
           </button>
@@ -179,7 +224,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Mobile Bottom Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur-lg lg:hidden">
-          <div className="grid grid-cols-3">
+          <div
+            className={`grid ${canOpenReport ? "grid-cols-4" : "grid-cols-3"}`}
+          >
             <MobileNavLink
               href={dashboardPath}
               icon="📊"
@@ -207,6 +254,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               label={canOpenStock ? "Stock" : "Reports"}
               active={canOpenStock ? pathname === "/stock-upload" : false}
             />
+            {canOpenReport && (
+              <MobileNavLink
+                href="/supervisor/report"
+                icon="📈"
+                label="Report"
+                active={pathname === "/supervisor/report"}
+              />
+            )}
           </div>
         </nav>
       </div>
@@ -232,10 +287,12 @@ function SideNavLink({
         "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150",
         active
           ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
-          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
       )}
     >
-      <span className="flex h-5 w-5 items-center justify-center text-[15px]">{icon}</span>
+      <span className="flex h-5 w-5 items-center justify-center text-[15px]">
+        {icon}
+      </span>
       {label}
     </Link>
   );
@@ -257,9 +314,7 @@ function MobileNavLink({
       href={href}
       className={cn(
         "flex flex-col items-center gap-0.5 py-3 text-center transition-colors",
-        active
-          ? "text-blue-600"
-          : "text-slate-500 hover:text-slate-700"
+        active ? "text-blue-600" : "text-slate-500 hover:text-slate-700",
       )}
     >
       <span className="text-lg leading-none">{icon}</span>
