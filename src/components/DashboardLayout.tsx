@@ -69,6 +69,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const canOpenOrder = role === "salesman";
   const canOpenStock = role === "admin_sales" || role === "supervisor";
   const canOpenReport = role === "supervisor";
+  const canOpenIncentive = role === "supervisor" || role === "salesman";
+  const incentivePath = role === "supervisor" ? "/supervisor/incentive" : "/salesman/incentive";
+  const canOpenOutletCheck = role === "supervisor" || role === "salesman";
+  const outletCheckPath = role === "supervisor" ? "/supervisor/outlet-check" : "/salesman/outlet-check";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -85,6 +89,56 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           : role === "apoteker"
             ? "Apoteker"
             : "Salesman";
+
+  const mobileNavItems = [
+    {
+      href: dashboardPath,
+      icon: "📊",
+      label: "Dashboard",
+      active: pathname === dashboardPath,
+    },
+  ];
+
+  if (canOpenOrder) {
+    mobileNavItems.push({
+      href: "/salesman/order",
+      icon: "📝",
+      label: "Order",
+      active: pathname === "/salesman/order",
+    });
+  }
+  if (canOpenStock) {
+    mobileNavItems.push({
+      href: "/stock-upload",
+      icon: "📦",
+      label: "Stock",
+      active: pathname === "/stock-upload",
+    });
+  }
+  if (canOpenReport) {
+    mobileNavItems.push({
+      href: "/supervisor/report",
+      icon: "📈",
+      label: "Report",
+      active: pathname === "/supervisor/report",
+    });
+  }
+  if (canOpenIncentive) {
+    mobileNavItems.push({
+      href: incentivePath,
+      icon: "💰",
+      label: "Incentive",
+      active: pathname === incentivePath,
+    });
+  }
+  if (canOpenOutletCheck) {
+    mobileNavItems.push({
+      href: outletCheckPath,
+      icon: "🏢",
+      label: "Outlet",
+      active: pathname === outletCheckPath,
+    });
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 lg:flex">
@@ -138,6 +192,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               icon="📈"
               label="Report"
               active={pathname === "/supervisor/report"}
+            />
+          )}
+          {canOpenIncentive && (
+            <SideNavLink
+              href={incentivePath}
+              icon="💰"
+              label="Incentive"
+              active={pathname === incentivePath}
+            />
+          )}
+          {canOpenOutletCheck && (
+            <SideNavLink
+              href={outletCheckPath}
+              icon="🏢"
+              label="Outlet Transaksi"
+              active={pathname === outletCheckPath}
             />
           )}
 
@@ -225,43 +295,25 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Mobile Bottom Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur-lg lg:hidden">
           <div
-            className={`grid ${canOpenReport ? "grid-cols-4" : "grid-cols-3"}`}
+            className={cn(
+              "grid",
+              mobileNavItems.length === 6 && "grid-cols-6",
+              mobileNavItems.length === 5 && "grid-cols-5",
+              mobileNavItems.length === 4 && "grid-cols-4",
+              mobileNavItems.length === 3 && "grid-cols-3",
+              mobileNavItems.length === 2 && "grid-cols-2",
+              mobileNavItems.length === 1 && "grid-cols-1"
+            )}
           >
-            <MobileNavLink
-              href={dashboardPath}
-              icon="📊"
-              label="Dashboard"
-              active={pathname === dashboardPath}
-            />
-            {canOpenOrder ? (
+            {mobileNavItems.map((item, idx) => (
               <MobileNavLink
-                href="/salesman/order"
-                icon="📝"
-                label="Order"
-                active={pathname === "/salesman/order"}
+                key={idx}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                active={item.active}
               />
-            ) : (
-              <MobileNavLink
-                href={dashboardPath}
-                icon="📋"
-                label="Orders"
-                active={false}
-              />
-            )}
-            <MobileNavLink
-              href={canOpenStock ? "/stock-upload" : dashboardPath}
-              icon={canOpenStock ? "📦" : "📈"}
-              label={canOpenStock ? "Stock" : "Reports"}
-              active={canOpenStock ? pathname === "/stock-upload" : false}
-            />
-            {canOpenReport && (
-              <MobileNavLink
-                href="/supervisor/report"
-                icon="📈"
-                label="Report"
-                active={pathname === "/supervisor/report"}
-              />
-            )}
+            ))}
           </div>
         </nav>
       </div>
